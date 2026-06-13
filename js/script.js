@@ -1,0 +1,227 @@
+/* ============================================================
+   AMINE PORTFOLIO  —  script.js
+   ============================================================ */
+
+'use strict';
+
+/* ============================================================
+   PAGE LOAD FADE-IN
+   ============================================================ */
+document.documentElement.style.opacity = '0';
+window.addEventListener('load', () => {
+  document.documentElement.style.transition = 'opacity 0.45s ease';
+  document.documentElement.style.opacity   = '1';
+});
+
+/* ============================================================
+   NAVBAR – scroll background + active link
+   ============================================================ */
+const navbar  = document.getElementById('navbar');
+const navLinks = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('section[id]');
+
+/* Darken navbar when scrolled */
+window.addEventListener('scroll', () => {
+  navbar.style.background = window.scrollY > 60
+    ? 'rgba(10,10,10,0.96)'
+    : 'rgba(16,16,16,0.87)';
+}, { passive: true });
+
+/* Highlight nav link matching current viewport section */
+function syncActiveLink() {
+  const offset = 140;
+  sections.forEach(sec => {
+    const top    = sec.offsetTop - offset;
+    const bottom = top + sec.offsetHeight;
+    const id     = sec.getAttribute('id');
+    if (window.scrollY >= top && window.scrollY < bottom) {
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === `#${id}`);
+      });
+    }
+  });
+}
+window.addEventListener('scroll', syncActiveLink, { passive: true });
+syncActiveLink();
+
+/* ============================================================
+   MOBILE HAMBURGER MENU
+   ============================================================ */
+const hamburger      = document.getElementById('hamburger');
+const navLinksWrap   = document.getElementById('navLinks');
+
+hamburger.addEventListener('click', () => {
+  const open = navLinksWrap.classList.toggle('open');
+  hamburger.innerHTML = open
+    ? '<i class="fa-solid fa-xmark"></i>'
+    : '<i class="fa-solid fa-bars"></i>';
+});
+
+/* Close menu when a link is clicked */
+navLinksWrap.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinksWrap.classList.remove('open');
+    hamburger.innerHTML = '<i class="fa-solid fa-bars"></i>';
+  });
+});
+
+/* Close menu when clicking outside */
+document.addEventListener('click', e => {
+  if (!navbar.contains(e.target)) {
+    navLinksWrap.classList.remove('open');
+    hamburger.innerHTML = '<i class="fa-solid fa-bars"></i>';
+  }
+});
+
+/* ============================================================
+   SCROLL REVEAL  (IntersectionObserver)
+   ============================================================ */
+const revealTargets = [
+  ...document.querySelectorAll('.section-title'),
+  ...document.querySelectorAll('.section-divider'),
+  ...document.querySelectorAll('.about-content'),
+  ...document.querySelectorAll('.project-card'),
+  ...document.querySelectorAll('.service-card'),
+  ...document.querySelectorAll('.skills-marquee'),
+  ...document.querySelectorAll('.contact-inner'),
+];
+
+revealTargets.forEach(el => el.classList.add('reveal'));
+
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+revealTargets.forEach(el => revealObserver.observe(el));
+
+/* ============================================================
+   HERO CHARACTER  – touch support (mobile tap to toggle)
+   ============================================================ */
+const heroChar   = document.getElementById('heroChar');
+const heroNormal = document.getElementById('heroNormal');
+const heroHover  = document.getElementById('heroHover');
+
+if (heroChar && heroNormal && heroHover) {
+  let touched = false;
+
+  heroChar.addEventListener('touchstart', () => {
+    touched = !touched;
+    heroNormal.style.opacity = touched ? '0' : '1';
+    heroHover.style.opacity  = touched ? '1' : '0';
+  }, { passive: true });
+}
+
+/* ============================================================
+   ABOUT IMAGE  – touch support
+   ============================================================ */
+const aboutImg = document.getElementById('aboutImg');
+if (aboutImg) {
+  let touchedAbout = false;
+  const aboutNormal = aboutImg.querySelector('.about-img-normal');
+  const aboutHover  = aboutImg.querySelector('.about-img-hover');
+
+  aboutImg.addEventListener('touchstart', () => {
+    touchedAbout = !touchedAbout;
+    if (aboutNormal) aboutNormal.style.opacity = touchedAbout ? '0' : '1';
+    if (aboutHover)  aboutHover.style.opacity  = touchedAbout ? '1' : '0';
+  }, { passive: true });
+}
+
+/* ============================================================
+   SKILLS MARQUEE  – pause on hover (JS fallback)
+   ============================================================ */
+const skillsTrack = document.getElementById('skillsTrack');
+if (skillsTrack) {
+  skillsTrack.addEventListener('mouseenter', () => {
+    skillsTrack.style.animationPlayState = 'paused';
+  });
+  skillsTrack.addEventListener('mouseleave', () => {
+    skillsTrack.style.animationPlayState = 'running';
+  });
+}
+
+/* ============================================================
+   CONTACT FORM
+   ============================================================ */
+const contactForm = document.getElementById('contactForm');
+
+contactForm.addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const name    = contactForm.querySelector('input[type="text"]').value.trim();
+  const email   = contactForm.querySelector('input[type="email"]').value.trim();
+  const message = contactForm.querySelector('textarea').value.trim();
+  const btn     = contactForm.querySelector('.btn-send');
+
+  if (!name || !email || !message) return;
+
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  const webhookURL = 'https://discord.com/api/webhooks/1515291555177697342/ThZntmfCK2PptCvdoWOH2R7ov-aooxQSHUkBr_dmfuFvdn7mi2Uj9bW3HHefNZLdmGQt';
+
+  const payload = {
+    embeds: [
+      {
+        title: 'Pesan Baru dari Portfolio!',
+        color: 0x9146FF,
+        fields: [
+          { name: 'Nama',    value: name,    inline: true  },
+          { name: 'Email',   value: email,   inline: true  },
+          { name: 'Pesan',   value: message, inline: false },
+        ],
+        footer: { text: 'KarlSharl Portfolio • Contact Form' },
+        timestamp: new Date().toISOString(),
+      }
+    ]
+  };
+
+  try {
+    const res = await fetch(webhookURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      btn.textContent = '✓ Pesan Terkirim!';
+      btn.style.background = '#1DB954';
+      btn.style.color = 'white';
+      btn.style.border = 'none';
+      contactForm.reset();
+      setTimeout(() => {
+        btn.textContent = 'Send Message';
+        btn.style = '';
+        btn.disabled = false;
+      }, 3000);
+    } else {
+      throw new Error('Failed');
+    }
+  } catch (err) {
+    btn.textContent = '✗ Gagal, coba lagi';
+    btn.style.color = 'red';
+    btn.disabled = false;
+    setTimeout(() => {
+      btn.textContent = 'Send Message';
+      btn.style = '';
+    }, 3000);
+  }
+});
+
+/* ============================================================
+   SMOOTH SCROLL – for older browsers without CSS scroll-behavior
+   ============================================================ */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', e => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    const top = target.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
