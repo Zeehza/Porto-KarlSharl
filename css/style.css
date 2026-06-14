@@ -13,8 +13,9 @@
   --card-bg:     #f4f1ee;
   --service-bg:  rgba(255,255,255,0.045);
   --border:      rgba(255,255,255,0.09);
-  --ff-display:  'Playfair Display', serif;
-  --ff-body:     'Inter', sans-serif;
+  --ff-display:  'Playfair Display', Georgia, serif;
+  --ff-heading:  'Caveat', cursive;
+  --ff-body:     'Cormorant Garamond', Georgia, serif;
   --transition:  0.28s ease;
 }
 
@@ -425,7 +426,7 @@ section {
 }
 
 .project-title {
-  font-family: var(--ff-display);
+  font-family: var(--ff-heading);
   font-size: 1.1rem;
   font-weight: 600;
   color: #111;
