@@ -1,7 +1,3 @@
-/* ============================================================
-   AMINE PORTFOLIO  —  script.js
-   ============================================================ */
-
 'use strict';
 
 /* ============================================================
@@ -100,19 +96,54 @@ const revealObserver = new IntersectionObserver(entries => {
 revealTargets.forEach(el => revealObserver.observe(el));
 
 /* ============================================================
-   HERO CHARACTER  – touch support (mobile tap to toggle)
+   HERO CHARACTER  – cursor spotlight reveal
    ============================================================ */
-const heroChar   = document.getElementById('heroChar');
-const heroNormal = document.getElementById('heroNormal');
-const heroHover  = document.getElementById('heroHover');
+const heroChar      = document.getElementById('heroChar');
+const heroHoverImg  = document.getElementById('Yabai');
+const heroNormalImg = document.getElementById('Normal'); // ← tambah ini
 
-if (heroChar && heroNormal && heroHover) {
+if (heroChar && heroHoverImg && heroNormalImg) {
+  const RADIUS = 80;
+
+  heroChar.addEventListener('mousemove', (e) => {
+    const rect = heroHoverImg.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Gambar 2 (Yabai): tampil HANYA di dalam buletin
+    heroHoverImg.style.clipPath = `circle(${RADIUS}px at ${x}px ${y}px)`;
+
+    // Gambar 1 (Normal): hilang di dalam buletin, tampil di luar
+    const mask = `radial-gradient(circle at ${x}px ${y}px, transparent ${RADIUS}px, black ${RADIUS}px)`;
+    heroNormalImg.style.webkitMaskImage = mask;
+    heroNormalImg.style.maskImage       = mask;
+  });
+
+  heroChar.addEventListener('mouseleave', () => {
+    heroHoverImg.style.clipPath         = 'circle(0px at 50% 50%)';
+    heroNormalImg.style.webkitMaskImage = '';
+    heroNormalImg.style.maskImage       = '';
+  });
+
+  // Mobile – tap toggle
   let touched = false;
-
-  heroChar.addEventListener('touchstart', () => {
+  heroChar.addEventListener('touchstart', (e) => {
     touched = !touched;
-    heroNormal.style.opacity = touched ? '0' : '1';
-    heroHover.style.opacity  = touched ? '1' : '0';
+    const rect  = heroHoverImg.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    if (touched) {
+      heroHoverImg.style.clipPath = `circle(${RADIUS}px at ${x}px ${y}px)`;
+      const mask = `radial-gradient(circle at ${x}px ${y}px, transparent ${RADIUS}px, black ${RADIUS}px)`;
+      heroNormalImg.style.webkitMaskImage = mask;
+      heroNormalImg.style.maskImage       = mask;
+    } else {
+      heroHoverImg.style.clipPath         = 'circle(0px at 50% 50%)';
+      heroNormalImg.style.webkitMaskImage = '';
+      heroNormalImg.style.maskImage       = '';
+    }
   }, { passive: true });
 }
 
@@ -225,3 +256,4 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     window.scrollTo({ top, behavior: 'smooth' });
   });
 });
+

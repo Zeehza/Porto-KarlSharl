@@ -241,10 +241,7 @@ section {
   transition: opacity 0.55s ease;
 }
 .hero-img-normal { opacity: 1; }
-.hero-img-hover  { opacity: 0; }
-
-.hero-character-wrap:hover .hero-img-normal { opacity: 0; }
-.hero-character-wrap:hover .hero-img-hover  { opacity: 1; }
+.hero-img-hover  { opacity: 1; clip-path: circle(0px at 50% 50%); transition: clip-path 0.1s ease; }
 
 /* CTA Buttons */
 .hero-cta {
