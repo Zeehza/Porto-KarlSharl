@@ -166,6 +166,7 @@ if (aboutImg) {
 /* ============================================================
    SKILLS MARQUEE  – pause on hover (JS fallback)
    ============================================================ */
+   
 const skillsTrack = document.getElementById('skillsTrack');
 if (skillsTrack) {
   skillsTrack.addEventListener('mouseenter', () => {
@@ -175,6 +176,43 @@ if (skillsTrack) {
     skillsTrack.style.animationPlayState = 'running';
   });
 }
+
+const videoCards = document.querySelectorAll('.video-card');
+
+  videoCards.forEach(card => {
+    const video = card.querySelector('video');
+    const btn   = card.querySelector('.play-btn');
+
+    if (!video) return;
+
+    function toggleVideo() {
+      if (video.paused) {
+        // Pause all others first
+        videoCards.forEach(c => {
+          const v = c.querySelector('video');
+          if (v && v !== video && !v.paused) {
+            v.pause();
+            c.classList.remove('playing');
+          }
+        });
+        video.muted = false;
+        video.play();
+        card.classList.add('playing');
+        if (btn) btn.textContent = '⏸';
+      } else {
+        video.pause();
+        card.classList.remove('playing');
+        if (btn) btn.textContent = '▶';
+      }
+    }
+
+    card.querySelector('.video-overlay').addEventListener('click', toggleVideo);
+
+    video.addEventListener('ended', () => {
+      card.classList.remove('playing');
+      if (btn) btn.textContent = '▶';
+    });
+  });
 
 /* ============================================================
    CONTACT FORM
@@ -200,13 +238,13 @@ contactForm.addEventListener('submit', async function (e) {
     embeds: [
       {
         title: 'Pesan Baru dari Portfolio!',
-        color: 0x9146FF,
+        color: 0x00C89E,
         fields: [
           { name: 'Nama',    value: name,    inline: true  },
           { name: 'Email',   value: email,   inline: true  },
           { name: 'Pesan',   value: message, inline: false },
         ],
-        footer: { text: 'KarlSharl Portfolio • Contact Form' },
+        footer: { text: 'KarlSharl Portfolio Form' },
         timestamp: new Date().toISOString(),
       }
     ]
