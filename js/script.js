@@ -1,6 +1,111 @@
 'use strict';
 
 /* ============================================================
+   PARTICLE CANVAS BACKGROUND
+   ============================================================ */
+(function () {
+  const canvas = document.getElementById('particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const CFG = {
+    count:       80,
+    maxDist:     130,
+    speed:       0.35,
+    radius:      1.8,
+    color:       '0, 200, 158',   /* #00C89E – --text-pri */
+    lineOpacity: 0.18,
+  };
+
+  let W, H;
+  let particles = [];
+  const mouse = { x: -9999, y: -9999 };
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  class Particle {
+    constructor(initial = false) {
+      this.reset(initial);
+    }
+    reset(initial = false) {
+      this.x  = Math.random() * W;
+      this.y  = initial ? Math.random() * H : -10;
+      this.vx = (Math.random() - 0.5) * CFG.speed;
+      this.vy = (Math.random() * 0.45 + 0.1) * CFG.speed;
+      this.r  = Math.random() * CFG.radius + 0.7;
+      this.a  = Math.random() * 0.45 + 0.2;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.y > H + 10 || this.x < -10 || this.x > W + 10) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${CFG.color}, ${this.a})`;
+      ctx.fill();
+    }
+  }
+
+  function drawLines() {
+    for (let i = 0; i < particles.length; i++) {
+      const pi = particles[i];
+
+      /* particle–particle lines */
+      for (let j = i + 1; j < particles.length; j++) {
+        const pj = particles[j];
+        const dx = pi.x - pj.x;
+        const dy = pi.y - pj.y;
+        const d  = Math.sqrt(dx * dx + dy * dy);
+        if (d < CFG.maxDist) {
+          ctx.beginPath();
+          ctx.moveTo(pi.x, pi.y);
+          ctx.lineTo(pj.x, pj.y);
+          ctx.strokeStyle = `rgba(${CFG.color}, ${(1 - d / CFG.maxDist) * CFG.lineOpacity})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+
+      /* particle–mouse lines */
+      const mx = pi.x - mouse.x;
+      const my = pi.y - mouse.y;
+      const md = Math.sqrt(mx * mx + my * my);
+      const mouseR = CFG.maxDist * 1.4;
+      if (md < mouseR) {
+        ctx.beginPath();
+        ctx.moveTo(pi.x, pi.y);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.strokeStyle = `rgba(${CFG.color}, ${(1 - md / mouseR) * 0.38})`;
+        ctx.lineWidth = 0.9;
+        ctx.stroke();
+      }
+    }
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    drawLines();
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+
+  /* init */
+  resize();
+  particles = Array.from({ length: CFG.count }, () => new Particle(true));
+  loop();
+
+  window.addEventListener('resize',    resize,                          { passive: true });
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+  window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+})();
+
+
+/* ============================================================
    PAGE LOAD FADE-IN
    ============================================================ */
 document.documentElement.style.opacity = '0';

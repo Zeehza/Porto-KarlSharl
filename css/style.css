@@ -6,14 +6,14 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg-base:     #3e3e3e;
-  --text-pri:    #e8e8e8;
-  --text-sec:    #aaaaaa;
-  --text-muted:  #777777;
+  --bg-base:     #13141A;
+  --text-pri:    #00C89E;
+  --text-sec:    #F7F4F0;
+  --text-muted:  #ffffff;
   --card-bg:     #f4f1ee;
-  --service-bg:  rgba(255,255,255,0.045);
-  --border:      rgba(255,255,255,0.09);
-  --ff-display:  'Playfair Display', Georgia, serif;
+  --service-bg:  rgba(19, 20, 26, 0.42);
+  --border:      #00C89E;
+  --ff-display:  'IM Fell French Canon SC', serif;
   --ff-heading:  'Caveat', cursive;
   --ff-body:     'Cormorant Garamond', Georgia, serif;
   --transition:  0.28s ease;
@@ -22,23 +22,11 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: var(--ff-body);
-  /* Long vertical gradient – darker toward the bottom */
-  background:
-    linear-gradient(180deg,
-      #484848 0%,
-      #424242 15%,
-      #3c3c3c 30%,
-      #363636 45%,
-      #2e2e2e 60%,
-      #262626 75%,
-      #1c1c1c 90%,
-      #141414 100%
-    );
-  background-attachment: fixed;
-  color: var(--text-pri);
-  line-height: 1.65;
-  min-height: 100vh;
+  background: linear-gradient(135deg, #0e0b18 0%, #13141A 50%, #081a16 100%);
+  color: var(--text-sec);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.6;
   overflow-x: hidden;
 }
 
@@ -50,6 +38,14 @@ img { max-width: 100%; display: block; }
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #111; }
 ::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.75;
+}
 
 /* ============================================================
    NAVBAR  – floating pill
@@ -408,7 +404,7 @@ section {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 20px;
-  box-shadow: 6px 8px 30px #00C89E;
+  box-shadow: 6px 8px 30px var(--text-pri);
   background: rgba(43, 32, 22, 0.18);
   min-height: 25%;
 }
@@ -432,10 +428,11 @@ section {
 }
 
 .project-card {
-  background: var(--card-bg);
+  background: var(--service-bg);
+  border: var(--text-pri) 2px solid;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  box-shadow: 6px 8px 10px var(--text-pri);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .project-card:hover {
@@ -468,12 +465,12 @@ section {
   font-family: var(--ff-heading);
   font-size: 1.1rem;
   font-weight: 600;
-  color: #111;
+  color: var(--text-sec);
 }
 
 .project-desc {
   font-size: 0.86rem;
-  color: #666;
+  color: var(--text-pri);
   line-height: 1.62;
 }
 
@@ -485,10 +482,11 @@ section {
 }
 
 .tag {
-  background: #1a1a1a;
-  color: #ddd;
+  background: var(--bg-base);
+  color: #fff;
   padding: 4px 13px;
   border-radius: 20px;
+  border: 2px solid var(--text-pri);  
   font-size: 0.77rem;
   font-weight: 500;
   letter-spacing: 0.3px;
@@ -503,18 +501,18 @@ section {
 .btn-sm {
   display: inline-block;
   padding: 7px 18px;
-  border: 1px solid #bbb;
+  border: 2px solid var(--text-pri);
   border-radius: 20px;
   font-size: 0.8rem;
-  color: #333;
+  color: #fff;
   background: transparent;
   cursor: pointer;
   transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
 }
 .btn-sm:hover {
-  background: #1a1a1a;
-  color: #f0f0f0;
-  border-color: #1a1a1a;
+  background: var(--text-pri);
+  color: #000;
+  border-color: #fff;
 }
 
 /* ============================================================
@@ -539,7 +537,7 @@ section {
 }
 .service-card:hover {
   background: rgba(255,255,255,0.075);
-  border-color: rgba(255,255,255,0.14);
+  border-color: var(--text-sec);
   transform: translateY(-5px);
 }
 
