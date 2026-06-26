@@ -1,8 +1,6 @@
 'use strict';
 
-/* ============================================================
-   PARTICLE CANVAS BACKGROUND
-   ============================================================ */
+//-- ===== PARTIKEL ===== -->
 (function () {
   const canvas = document.getElementById('particles');
   if (!canvas) return;
@@ -151,7 +149,8 @@ syncActiveLink();
 const hamburger      = document.getElementById('hamburger');
 const navLinksWrap   = document.getElementById('navLinks');
 
-hamburger.addEventListener('click', () => {
+hamburger.addEventListener('click', (e) => {
+  e.stopPropagation();
   const open = navLinksWrap.classList.toggle('open');
   hamburger.innerHTML = open
     ? '<i class="fa-solid fa-xmark"></i>'
@@ -364,8 +363,8 @@ contactForm.addEventListener('submit', async function (e) {
 
     if (res.ok) {
       btn.textContent = '✓ Pesan Terkirim!';
-      btn.style.background = '#1DB954';
-      btn.style.color = 'white';
+      btn.style.background = '#00C89E';
+      btn.style.color = 'black';
       btn.style.border = 'none';
       contactForm.reset();
       setTimeout(() => {
