@@ -399,3 +399,111 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
+/* ============================================================
+   SCHEDULED STREAM  (YouTube Data API v3)
+   ============================================================ */
+(function () {
+  const grid   = document.getElementById('scheduleGrid');
+  const status = document.getElementById('scheduleStatus');
+  if (!grid) return;
+
+  const YT_API_KEY    = 'GANTI_DENGAN_API_KEY_KAMU';
+  const YT_CHANNEL_ID = 'GANTI_DENGAN_CHANNEL_ID_KAMU';
+  const CACHE_KEY = 'ytSchedule';
+  const CACHE_TTL = 5 * 60 * 1000; // 5 menit, biar quota API gak jebol
+
+  async function fetchUpcoming() {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { data, ts } = JSON.parse(cached);
+      if (Date.now() - ts < CACHE_TTL) return data;
+    }
+
+    // 1) Cari video dengan status "upcoming" (waiting room) di channel
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?key=${YT_API_KEY}&channelId=${YT_CHANNEL_ID}&type=video&eventType=upcoming&order=date&part=id&maxResults=6`;
+    const searchRes  = await fetch(searchUrl);
+    const searchJson = await searchRes.json();
+
+    const ids = (searchJson.items || []).map(item => item.id.videoId).join(',');
+    if (!ids) return [];
+
+    // 2) Ambil detail + jadwal mulai tiap video
+    const videoUrl  = `https://www.googleapis.com/youtube/v3/videos?key=${YT_API_KEY}&id=${ids}&part=snippet,liveStreamingDetails`;
+    const videoRes  = await fetch(videoUrl);
+    const videoJson = await videoRes.json();
+
+    const data = (videoJson.items || []).map(v => ({
+      id:        v.id,
+      title:     v.snippet.title,
+      thumbnail: v.snippet.thumbnails.medium.url,
+      startTime: v.liveStreamingDetails ? v.liveStreamingDetails.scheduledStartTime : null,
+    }));
+
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+    return data;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return 'Belum ada waktu pasti';
+    return new Date(iso).toLocaleString('id-ID', {
+      weekday: 'long', day: 'numeric', month: 'long',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  function countdownText(iso) {
+    if (!iso) return '';
+    const diff = new Date(iso).getTime() - Date.now();
+    if (diff <= 0) return 'Segera dimulai';
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    return `${d}h ${h}j ${m}m lagi`;
+  }
+
+  function renderCards(streams) {
+    grid.innerHTML = '';
+
+    if (!streams.length) {
+      grid.innerHTML = '<p class="schedule-status">Belum ada stream yang dijadwalkan saat ini.</p>';
+      return;
+    }
+
+    streams.forEach(stream => {
+      const card = document.createElement('div');
+      card.className = 'schedule-card';
+      card.innerHTML = `
+        <div class="schedule-img-wrap">
+          <span class="schedule-live-badge">Waiting Room</span>
+          <img src="${stream.thumbnail}" alt="Thumbnail" />
+        </div>
+        <div class="schedule-body">
+          <h3 class="schedule-title">${stream.title}</h3>
+          <div class="schedule-date">${formatDate(stream.startTime)}</div>
+          <div class="schedule-countdown" data-start="${stream.startTime || ''}">${countdownText(stream.startTime)}</div>
+          <div class="schedule-links">
+            <a href="https://www.youtube.com/watch?v=${stream.id}" class="btn-sm btn-yt" target="_blank">&#9654; Buka Waiting Room</a>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      card.classList.add('reveal');
+      if (typeof revealObserver !== 'undefined') revealObserver.observe(card);
+    });
+
+    setInterval(() => {
+      document.querySelectorAll('.schedule-countdown').forEach(el => {
+        const start = el.dataset.start;
+        if (start) el.textContent = countdownText(start);
+      });
+    }, 60000);
+  }
+
+  fetchUpcoming()
+    .then(renderCards)
+    .catch(err => {
+      console.error('Gagal ambil jadwal YouTube:', err);
+      grid.innerHTML = '<p class="schedule-status">Gagal memuat jadwal, coba refresh halaman.</p>';
+    });
+})();
