@@ -256,14 +256,8 @@ if (heroChar && heroHoverImg && heroNormalImg) {
    ============================================================ */
 const aboutImg = document.getElementById('aboutImg');
 if (aboutImg) {
-  let touchedAbout = false;
-  const aboutNormal = aboutImg.querySelector('.about-img-normal');
-  const aboutHover  = aboutImg.querySelector('.about-img-hover');
-
   aboutImg.addEventListener('touchstart', () => {
-    touchedAbout = !touchedAbout;
-    if (aboutNormal) aboutNormal.style.opacity = touchedAbout ? '0' : '1';
-    if (aboutHover)  aboutHover.style.opacity  = touchedAbout ? '1' : '0';
+    aboutImg.classList.toggle('flipped');
   }, { passive: true });
 }
 

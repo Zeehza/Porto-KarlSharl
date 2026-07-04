@@ -275,15 +275,27 @@ section {
   margin: 0 auto;
 }
 
-/* Image card with hover swap */
+/* Image card with hover flip */
 .about-img-wrap {
   position: relative;
   border-radius: 14px;
-  overflow: hidden;
   cursor: pointer;
   aspect-ratio: 3 / 4;
   max-width: 380px;
   width: 100%;
+  perspective: 1200px;
+}
+
+.about-img-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s;
+  transform-style: preserve-3d;
+}
+.about-img-wrap:hover .about-img-inner,
+.about-img-wrap.flipped .about-img-inner {
+  transform: rotateY(180deg);
 }
 
 .about-img {
@@ -292,12 +304,11 @@ section {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.55s ease;
+  border-radius: 14px;
+  backface-visibility: hidden;
 }
-.about-img-normal { opacity: 1; }
-.about-img-hover  { opacity: 0; }
-.about-img-wrap:hover .about-img-normal { opacity: 0; }
-.about-img-wrap:hover .about-img-hover  { opacity: 1; }
+.about-img-front { transform: rotateY(0deg); }
+.about-img-back  { transform: rotateY(180deg); }
 
 .about-text {
   font-size: 1.2rem;
@@ -651,6 +662,48 @@ section {
   font-size: 1rem;
   color: var(--text-sec);
   line-height: 1.8;
+}
+
+/* ============================================================
+   SUPPORT
+   ============================================================ */
+.support { text-align: center; }
+
+.support-card {
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--service-bg);
+  border: var(--text-pri) 2px solid;
+  border-radius: 14px;
+  padding: 36px 32px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.support-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+}
+
+.support-icon {
+  font-size: 2.2rem;
+  color: var(--text-pri);
+  margin-bottom: 12px;
+}
+
+.support-title {
+  font-family: var(--ff-heading);
+  font-size: 1.4rem;
+  color: var(--text-sec);
+  margin-bottom: 10px;
+}
+
+.support-desc {
+  font-size: 0.92rem;
+  color: var(--text-pri);
+  line-height: 1.65;
+  margin-bottom: 20px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ============================================================
