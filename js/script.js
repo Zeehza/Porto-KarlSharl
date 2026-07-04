@@ -407,8 +407,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   const status = document.getElementById('scheduleStatus');
   if (!grid) return;
 
-  const YT_API_KEY    = 'GANTI_DENGAN_API_KEY_KAMU';
-  const YT_CHANNEL_ID = 'GANTI_DENGAN_CHANNEL_ID_KAMU';
+  const YT_API_KEY    = 'AIzaSyDX9Uc-n_cof3rtVV9HTQ_VWGdcvXoDTqA';
+  const YT_CHANNEL_ID = 'UCndWeMfiDIQs-o18GJPwETA';
   const CACHE_KEY = 'ytSchedule';
   const CACHE_TTL = 5 * 60 * 1000; // 5 menit, biar quota API gak jebol
 
