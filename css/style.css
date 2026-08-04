@@ -6,7 +6,6 @@
   --text-pri:    #00C89E;
   --text-sec:    #F7F4F0;
   --text-muted:  #ffffff;
-  --card-bg:     #f4f1ee;
   --service-bg:  rgba(19, 20, 26, 0.42);
   --border:      #00C89E;
   --ff-display:  'IM Fell French Canon SC', serif;
@@ -20,7 +19,7 @@ html { scroll-behavior: smooth; }
 body {
   background: linear-gradient(135deg, #0e0b18 0%, #13141A 50%, #081a16 100%);
   color: var(--text-sec);
-  font-family: var(--font-body);
+  font-family: var(--ff-body);
   font-size: 18px;
   line-height: 1.6;
   overflow-x: hidden;
@@ -332,7 +331,6 @@ section {
 .skills-track {
   display: flex;
   align-items: center;
-  gap: 50px;
   width: max-content;
   animation: marqueeScroll 15s linear infinite;
 }
@@ -343,43 +341,23 @@ section {
   to   { transform: translateX(-50%); }
 }
 
-.skill-icon {
-  font-size: 2.8rem;
-  color: #666;
-  filter: grayscale(1) brightness(0.72);
-  transition: filter 0.3s ease, transform 0.3s ease;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.skill-icon:hover {
-  filter: grayscale(0) brightness(1.1);
-  transform: scale(1.18) translateY(-3px);
-}
-
-.skill-text-icon {
-  font-family: var(--ff-body);
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #666;
-  flex-shrink: 0;
-  letter-spacing: -1px;
-  line-height: 1;
-}
-
-.skill-badge-icon {
-  display: inline-flex;
+.skill-item {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-family: var(--ff-body);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #666;
-  border: 2px solid #555;
-  border-radius: 8px;
-  padding: 5px 9px;
+  gap: 8px;
+  margin-right: 50px;
   flex-shrink: 0;
-  letter-spacing: 0;
+  white-space: nowrap;
+}
+.skill-item i {
+  font-size: 1.8rem;
   line-height: 1;
+}
+.skill-item span {
+  font-family: var(--ff-body);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-sec);
 }
 
 /* ===== VIDEO SECTION ===== */

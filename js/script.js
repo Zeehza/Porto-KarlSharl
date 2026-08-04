@@ -1,6 +1,10 @@
 'use strict';
 
-//-- ===== PARTIKEL ===== -->
+/* ============================================================
+   GLOBAL / PAGE-WIDE
+   ============================================================ */
+
+/* ----- Partikel background canvas ----- */
 (function () {
   const canvas = document.getElementById('particles');
   if (!canvas) return;
@@ -102,20 +106,53 @@
   window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
 })();
 
-
-/* ============================================================
-   PAGE LOAD FADE-IN
-   ============================================================ */
+/* ----- Page load fade-in ----- */
 document.documentElement.style.opacity = '0';
 window.addEventListener('load', () => {
   document.documentElement.style.transition = 'opacity 0.45s ease';
   document.documentElement.style.opacity   = '1';
 });
 
+/* ----- Smooth scroll (fallback utk browser tanpa CSS scroll-behavior) ----- */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', e => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    const top = target.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+/* ----- Scroll reveal (IntersectionObserver) ----- */
+const revealTargets = [
+  ...document.querySelectorAll('.section-title'),
+  ...document.querySelectorAll('.section-divider'),
+  ...document.querySelectorAll('.about-content'),
+  ...document.querySelectorAll('.project-card'),
+  ...document.querySelectorAll('.service-card'),
+  ...document.querySelectorAll('.skills-marquee'),
+  ...document.querySelectorAll('.contact-inner'),
+];
+
+revealTargets.forEach(el => el.classList.add('reveal'));
+
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+revealTargets.forEach(el => revealObserver.observe(el));
+
+
 /* ============================================================
-   NAVBAR – scroll background + active link
+   NAVBAR – scroll background, active link, mobile hamburger
    ============================================================ */
-const navbar  = document.getElementById('navbar');
+const navbar   = document.getElementById('navbar');
 const navLinks = document.querySelectorAll('.nav-link');
 const sections = document.querySelectorAll('section[id]');
 
@@ -143,11 +180,9 @@ function syncActiveLink() {
 window.addEventListener('scroll', syncActiveLink, { passive: true });
 syncActiveLink();
 
-/* ============================================================
-   MOBILE HAMBURGER MENU
-   ============================================================ */
-const hamburger      = document.getElementById('hamburger');
-const navLinksWrap   = document.getElementById('navLinks');
+/* Mobile hamburger menu */
+const hamburger    = document.getElementById('hamburger');
+const navLinksWrap = document.getElementById('navLinks');
 
 hamburger.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -173,86 +208,58 @@ document.addEventListener('click', e => {
   }
 });
 
-/* ============================================================
-   SCROLL REVEAL  (IntersectionObserver)
-   ============================================================ */
-const revealTargets = [
-  ...document.querySelectorAll('.section-title'),
-  ...document.querySelectorAll('.section-divider'),
-  ...document.querySelectorAll('.about-content'),
-  ...document.querySelectorAll('.project-card'),
-  ...document.querySelectorAll('.service-card'),
-  ...document.querySelectorAll('.skills-marquee'),
-  ...document.querySelectorAll('.contact-inner'),
-];
-
-revealTargets.forEach(el => el.classList.add('reveal'));
-
-const revealObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-revealTargets.forEach(el => revealObserver.observe(el));
 
 /* ============================================================
-   HERO CHARACTER  – cursor spotlight reveal
+   HERO – cursor spotlight reveal (mouse + touch)
    ============================================================ */
 const heroChar      = document.getElementById('heroChar');
 const heroHoverImg  = document.getElementById('Yabai');
-const heroNormalImg = document.getElementById('Normal'); // ← tambah ini
+const heroNormalImg = document.getElementById('Normal');
 
 if (heroChar && heroHoverImg && heroNormalImg) {
   const RADIUS = 80;
 
-  heroChar.addEventListener('mousemove', (e) => {
-    const rect = heroHoverImg.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Gambar 2 (Yabai): tampil HANYA di dalam buletin
+  /* Gambar 2 (Yabai): tampil HANYA di dalam lingkaran kursor.
+     Gambar 1 (Normal): hilang di dalam lingkaran, tampil di luar.
+     Dipakai bareng oleh mousemove & touchstart supaya logikanya tidak dobel. */
+  function showHoverAt(x, y) {
     heroHoverImg.style.clipPath = `circle(${RADIUS}px at ${x}px ${y}px)`;
-
-    // Gambar 1 (Normal): hilang di dalam buletin, tampil di luar
     const mask = `radial-gradient(circle at ${x}px ${y}px, transparent ${RADIUS}px, black ${RADIUS}px)`;
     heroNormalImg.style.webkitMaskImage = mask;
     heroNormalImg.style.maskImage       = mask;
-  });
+  }
 
-  heroChar.addEventListener('mouseleave', () => {
+  function resetHover() {
     heroHoverImg.style.clipPath         = 'circle(0px at 50% 50%)';
     heroNormalImg.style.webkitMaskImage = '';
     heroNormalImg.style.maskImage       = '';
+  }
+
+  heroChar.addEventListener('mousemove', (e) => {
+    const rect = heroHoverImg.getBoundingClientRect();
+    showHoverAt(e.clientX - rect.left, e.clientY - rect.top);
   });
 
-  // Mobile – tap toggle
+  heroChar.addEventListener('mouseleave', resetHover);
+
+  /* Mobile – tap toggle */
   let touched = false;
   heroChar.addEventListener('touchstart', (e) => {
     touched = !touched;
     const rect  = heroHoverImg.getBoundingClientRect();
     const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
 
     if (touched) {
-      heroHoverImg.style.clipPath = `circle(${RADIUS}px at ${x}px ${y}px)`;
-      const mask = `radial-gradient(circle at ${x}px ${y}px, transparent ${RADIUS}px, black ${RADIUS}px)`;
-      heroNormalImg.style.webkitMaskImage = mask;
-      heroNormalImg.style.maskImage       = mask;
+      showHoverAt(touch.clientX - rect.left, touch.clientY - rect.top);
     } else {
-      heroHoverImg.style.clipPath         = 'circle(0px at 50% 50%)';
-      heroNormalImg.style.webkitMaskImage = '';
-      heroNormalImg.style.maskImage       = '';
+      resetHover();
     }
   }, { passive: true });
 }
 
+
 /* ============================================================
-   ABOUT IMAGE  – touch support
+   ABOUT – image touch support (tap to flip di mobile)
    ============================================================ */
 const aboutImg = document.getElementById('aboutImg');
 if (aboutImg) {
@@ -260,141 +267,12 @@ if (aboutImg) {
     aboutImg.classList.toggle('flipped');
   }, { passive: true });
 }
+/* Catatan: pause-on-hover utk skills marquee TIDAK butuh JS —
+   sudah ditangani CSS (.skills-track:hover { animation-play-state: paused; }) */
+
 
 /* ============================================================
-   SKILLS MARQUEE  – pause on hover (JS fallback)
-   ============================================================ */
-   
-const skillsTrack = document.getElementById('skillsTrack');
-if (skillsTrack) {
-  skillsTrack.addEventListener('mouseenter', () => {
-    skillsTrack.style.animationPlayState = 'paused';
-  });
-  skillsTrack.addEventListener('mouseleave', () => {
-    skillsTrack.style.animationPlayState = 'running';
-  });
-}
-
-const videoCards = document.querySelectorAll('.video-card');
-
-  videoCards.forEach(card => {
-    const video = card.querySelector('video');
-    const btn   = card.querySelector('.play-btn');
-
-    if (!video) return;
-
-    function toggleVideo() {
-      if (video.paused) {
-        // Pause all others first
-        videoCards.forEach(c => {
-          const v = c.querySelector('video');
-          if (v && v !== video && !v.paused) {
-            v.pause();
-            c.classList.remove('playing');
-          }
-        });
-        video.muted = false;
-        video.play();
-        card.classList.add('playing');
-        if (btn) btn.textContent = '⏸';
-      } else {
-        video.pause();
-        card.classList.remove('playing');
-        if (btn) btn.textContent = '▶';
-      }
-    }
-
-    card.querySelector('.video-overlay').addEventListener('click', toggleVideo);
-
-    video.addEventListener('ended', () => {
-      card.classList.remove('playing');
-      if (btn) btn.textContent = '▶';
-    });
-  });
-
-/* ============================================================
-   CONTACT FORM
-   ============================================================ */
-const contactForm = document.getElementById('contactForm');
-
-contactForm.addEventListener('submit', async function (e) {
-  e.preventDefault();
-
-  const name    = contactForm.querySelector('input[type="text"]').value.trim();
-  const email   = contactForm.querySelector('input[type="email"]').value.trim();
-  const message = contactForm.querySelector('textarea').value.trim();
-  const btn     = contactForm.querySelector('.btn-send');
-
-  if (!name || !email || !message) return;
-
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-
-  const webhookURL = 'https://discord.com/api/webhooks/1515291555177697342/ThZntmfCK2PptCvdoWOH2R7ov-aooxQSHUkBr_dmfuFvdn7mi2Uj9bW3HHefNZLdmGQt';
-
-  const payload = {
-    embeds: [
-      {
-        title: 'Pesan Baru dari Portfolio!',
-        color: 0x00C89E,
-        fields: [
-          { name: 'Nama',    value: name,    inline: true  },
-          { name: 'Email',   value: email,   inline: true  },
-          { name: 'Pesan',   value: message, inline: false },
-        ],
-        footer: { text: 'KarlSharl Portfolio Form' },
-        timestamp: new Date().toISOString(),
-      }
-    ]
-  };
-
-  try {
-    const res = await fetch(webhookURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (res.ok) {
-      btn.textContent = '✓ Pesan Terkirim!';
-      btn.style.background = '#00C89E';
-      btn.style.color = 'black';
-      btn.style.border = 'none';
-      contactForm.reset();
-      setTimeout(() => {
-        btn.textContent = 'Send Message';
-        btn.style = '';
-        btn.disabled = false;
-      }, 3000);
-    } else {
-      throw new Error('Failed');
-    }
-  } catch (err) {
-    btn.textContent = '✗ Gagal, coba lagi';
-    btn.style.color = 'red';
-    btn.disabled = false;
-    setTimeout(() => {
-      btn.textContent = 'Send Message';
-      btn.style = '';
-    }, 3000);
-  }
-});
-
-/* ============================================================
-   SMOOTH SCROLL – for older browsers without CSS scroll-behavior
-   ============================================================ */
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', e => {
-    const target = document.querySelector(anchor.getAttribute('href'));
-    if (!target) return;
-    e.preventDefault();
-    const top = target.getBoundingClientRect().top + window.scrollY - 80;
-    window.scrollTo({ top, behavior: 'smooth' });
-  });
-});
-
-/* ============================================================
-   SCHEDULED STREAM  (YouTube Data API v3)
+   SCHEDULED STREAM (YouTube Data API v3)
    ============================================================ */
 (function () {
   const grid   = document.getElementById('scheduleGrid');
@@ -501,3 +379,72 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       grid.innerHTML = '<p class="schedule-status">Gagal memuat jadwal, coba refresh halaman.</p>';
     });
 })();
+
+
+/* ============================================================
+   CONTACT FORM
+   ============================================================ */
+const contactForm = document.getElementById('contactForm');
+
+contactForm.addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const name    = contactForm.querySelector('input[type="text"]').value.trim();
+  const email   = contactForm.querySelector('input[type="email"]').value.trim();
+  const message = contactForm.querySelector('textarea').value.trim();
+  const btn     = contactForm.querySelector('.btn-send');
+
+  if (!name || !email || !message) return;
+
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  const webhookURL = 'https://discord.com/api/webhooks/1515291555177697342/ThZntmfCK2PptCvdoWOH2R7ov-aooxQSHUkBr_dmfuFvdn7mi2Uj9bW3HHefNZLdmGQt';
+
+  const payload = {
+    embeds: [
+      {
+        title: 'Pesan Baru dari Portfolio!',
+        color: 0x00C89E,
+        fields: [
+          { name: 'Nama',    value: name,    inline: true  },
+          { name: 'Email',   value: email,   inline: true  },
+          { name: 'Pesan',   value: message, inline: false },
+        ],
+        footer: { text: 'KarlSharl Portfolio Form' },
+        timestamp: new Date().toISOString(),
+      }
+    ]
+  };
+
+  try {
+    const res = await fetch(webhookURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      btn.textContent = '✓ Pesan Terkirim!';
+      btn.style.background = '#00C89E';
+      btn.style.color = 'black';
+      btn.style.border = 'none';
+      contactForm.reset();
+      setTimeout(() => {
+        btn.textContent = 'Send Message';
+        btn.style = '';
+        btn.disabled = false;
+      }, 3000);
+    } else {
+      throw new Error('Failed');
+    }
+  } catch (err) {
+    btn.textContent = '✗ Gagal, coba lagi';
+    btn.style.color = 'red';
+    btn.disabled = false;
+    setTimeout(() => {
+      btn.textContent = 'Send Message';
+      btn.style = '';
+    }, 3000);
+  }
+});
