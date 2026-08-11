@@ -1,4 +1,5 @@
 'use strict';
+import { inView, animate } from "motion";
 
 /* ============================================================
    GLOBAL / PAGE-WIDE
@@ -124,7 +125,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-/* ----- Scroll reveal (IntersectionObserver) ----- */
+/* ----- Scroll reveal (Framer Motion) ----- */
 const revealTargets = [
   ...document.querySelectorAll('.section-title'),
   ...document.querySelectorAll('.section-divider'),
@@ -135,18 +136,36 @@ const revealTargets = [
   ...document.querySelectorAll('.contact-inner'),
 ];
 
-revealTargets.forEach(el => el.classList.add('reveal'));
+// Set initial invisible states
+revealTargets.forEach(el => {
+  el.style.opacity = 0;
+  el.style.transform = 'translateY(50px)';
+});
 
-const revealObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      revealObserver.unobserve(entry.target);
+// Create global function to reuse on dynamically loaded elements
+window.applyFramerReveal = (el) => {
+  inView(el, () => {
+    let delay = 0;
+    
+    // Stagger delay based on sibling index for grid items
+    if (el.classList.contains('project-card') || el.classList.contains('service-card') || el.classList.contains('schedule-card')) {
+      const index = Array.from(el.parentElement.children).indexOf(el);
+      delay = index * 0.15;
     }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-revealTargets.forEach(el => revealObserver.observe(el));
+    animate(el, 
+      { opacity: [0, 1], y: [50, 0] }, 
+      { 
+        type: "spring",
+        bounce: 0.4,
+        duration: 0.8,
+        delay: delay
+      }
+    );
+  }, { margin: "0px 0px -50px 0px" });
+};
+
+revealTargets.forEach(el => window.applyFramerReveal(el));
 
 
 /* ============================================================
@@ -267,6 +286,22 @@ if (aboutImg) {
     aboutImg.classList.toggle('flipped');
   }, { passive: true });
 }
+
+/* ============================================================
+   SKILLS MARQUEE - Infinite scroll cloning
+   ============================================================ */
+const skillsTrack = document.getElementById('skillsTrack');
+if (skillsTrack) {
+  const items = Array.from(skillsTrack.children);
+  // Clone 3 times to ensure the track is long enough for any screen
+  for (let i = 0; i < 3; i++) {
+    items.forEach(item => {
+      const clone = item.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      skillsTrack.appendChild(clone);
+    });
+  }
+}
 /* Catatan: pause-on-hover utk skills marquee TIDAK butuh JS —
    sudah ditangani CSS (.skills-track:hover { animation-play-state: paused; }) */
 
@@ -360,8 +395,7 @@ if (aboutImg) {
       `;
       grid.appendChild(card);
 
-      card.classList.add('reveal');
-      if (typeof revealObserver !== 'undefined') revealObserver.observe(card);
+      if (typeof window.applyFramerReveal !== 'undefined') window.applyFramerReveal(card);
     });
 
     setInterval(() => {
